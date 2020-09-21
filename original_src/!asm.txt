@@ -1,0 +1,585 @@
+Taken from GBCPUman.pdf. Check that document for instruction perameters, if needed. I haven't put a lot of effort into checking this, just enough to make it a memory efficient forward and backwards command lookup.
+
+3.3. Commands
+The GameBoy CPU is based on a subset of the Z80 microprocessor.
+
+Instruction Parameters Opcode Cycles
+LD A,A 7F 4
+LD A,B 78 4
+LD A,C 79 4
+LD A,D 7A 4
+LD A,E 7B 4
+LD A,H 7C 4
+LD A,L 7D 4
+LD A,(BC) 0A 8
+LD A,(DE) 1A 8
+LD A,(HL) 7E 8
+LD A,(nn) FA 16
+LD A,n 3E 8
+LD B,A 47 4
+LD B,B 40 4
+LD B,C 41 4
+LD B,D 42 4
+LD B,E 43 4
+LD B,H 44 4
+LD B,L 45 4
+LD B,(HL) 46 8
+LD B,n 06 8
+LD C,A 4F 4
+LD C,B 48 4
+LD C,C 49 4
+LD C,D 4A 4
+LD C,E 4B 4
+LD C,H 4C 4
+LD C,L 4D 4
+LD C,(HL) 4E 8
+LD C,n 0E 8
+LD D,A 57 4
+LD D,B 50 4
+LD D,C 51 4
+LD D,D 52 4
+LD D,E 53 4
+LD D,H 54 4
+LD D,L 55 4
+LD D,(HL) 56 8
+LD D,n 16 8
+LD E,A 5F 4
+LD E,B 58 4
+LD E,C 59 4
+LD E,D 5A 4
+LD E,E 5B 4
+LD E,H 5C 4
+LD E,L 5D 4
+LD E,(HL) 5E 8
+LD E,n 1E 8
+LD H,A 67 4
+LD H,B 60 4
+LD H,C 61 4
+LD H,D 62 4
+LD H,E 63 4
+LD H,H 64 4
+LD H,L 65 4
+LD H,(HL) 66 8
+LD H,n 26 8
+LD L,A 6F 4
+LD L,B 68 4
+LD L,C 69 4
+LD L,D 6A 4
+LD L,E 6B 4
+LD L,H 6C 4
+LD L,L 6D 4
+LD L,(HL) 6E 8
+LD L,n 2E 8
+LD (HL),B 70 8
+LD (HL),C 71 8
+LD (HL),D 72 8
+LD (HL),E 73 8
+LD (HL),H 74 8
+LD (HL),L 75 8
+LD (HL),n 36 12
+LD (BC),A 02 8
+LD (DE),A 12 8
+LD (HL),A 77 8
+LD (nn),A EA 16
+LD BC,nn 01 12
+LD DE,nn 11 12
+LD HL,nn 21 12
+LD SP,nn 31 12
+LD SP,HL F9 8
+LD A,(C) F2 8
+LD ($FF00+C),A E2 8
+LD ($FF00+n),A E0 12
+LD A,($FF00+n) F0 12
+LD (nn),SP 08 20
+LDI (HL),A 22 8
+LDI A,(HL) 2A 8
+LDD (HL),A 32 8
+LDD A,(HL) 3A 8
+LDHL SP,n F8 12
+PUSH AF F5 16
+PUSH BC C5 16
+PUSH DE D5 16
+PUSH HL E5 16
+POP AF F1 12
+POP BC C1 12
+POP DE D1 12
+POP HL E1 12
+ADD A,A 87 4
+ADD A,B 80 4
+ADD A,C 81 4
+ADD A,D 82 4
+ADD A,E 83 4
+ADD A,H 84 4
+ADD A,L 85 4
+ADD A,(HL) 86 8
+ADD A,n C6 8
+ADD HL,BC 09 8
+ADD HL,DE 19 8
+ADD HL,HL 29 8
+ADD HL,SP 39 8
+ADD SP,n E8 16
+ADC A,A 8F 4
+ADC A,B 88 4
+ADC A,C 89 4
+ADC A,D 8A 4
+ADC A,E 8B 4
+ADC A,H 8C 4
+ADC A,L 8D 4
+ADC A,(HL) 8E 8
+ADC A,n CE 8
+SUB A 97 4
+SUB B 90 4
+SUB C 91 4
+SUB D 92 4
+SUB E 93 4
+SUB H 94 4
+SUB L 95 4
+SUB (HL) 96 8
+SUB n D6 8
+SBC A,A 9F 4
+SBC A,B 98 4
+SBC A,C 99 4
+SBC A,D 9A 4
+SBC A,E 9B 4
+SBC A,H 9C 4
+SBC A,L 9D 4
+SBC A,(HL) 9E 8
+SBC A,n DE 8
+AND A A7 4
+AND B A0 4
+AND C A1 4
+AND D A2 4
+AND E A3 4
+AND H A4 4
+AND L A5 4
+AND (HL) A6 8
+AND n E6 8
+OR A B7 4
+OR B B0 4
+OR C B1 4
+OR D B2 4
+OR E B3 4
+OR H B4 4
+OR L B5 4
+OR (HL) B6 8
+OR n F6 8
+XOR A AF 4
+XOR B A8 4
+XOR C A9 4
+XOR D AA 4
+XOR E AB 4
+XOR H AC 4
+XOR L AD 4
+XOR (HL) AE 8
+XOR * EE 8
+CP A BF 4
+CP B B8 4
+CP C B9 4
+CP D BA 4
+CP E BB 4
+CP H BC 4
+CP L BD 4
+CP (HL) BE 8
+CP n FE 8
+INC A 3C 4
+INC B 04 4
+INC C 0C 4
+INC D 14 4
+INC E 1C 4
+INC H 24 4
+INC L 2C 4
+INC (HL) 34 12
+INC BC 03 8
+INC DE 13 8
+INC HL 23 8
+INC SP 33 8
+DEC A 3D 4
+DEC B 05 4
+DEC C 0D 4
+DEC D 15 4
+DEC E 1D 4
+DEC H 25 4
+DEC L 2D 4
+DEC (HL) 35 12
+DEC BC 0B 8
+DEC DE 1B 8
+DEC HL 2B 8
+DEC SP 3B 8
+SWAP A CB 37 8
+SWAP B CB 30 8
+SWAP C CB 31 8
+SWAP D CB 32 8
+SWAP E CB 33 8
+SWAP H CB 34 8
+SWAP L CB 35 8
+SWAP (HL) CB 36 16
+JP nn C3 12
+JP NZ,nn C2 12 (If Not Equal)
+JP Z,nn CA 12  (If Equal)
+JP NC,nn D2 12 (If Greater Than or Equal To)
+JP C,nn DA 12  (If Less Than)
+JP (HL) E9 4
+JR n 18 8
+JR NZ,* 20 8 (If Not Equal)
+JR Z,* 28 8  (If Equal)
+JR NC,* 30 8 (If Greater Than or Equal To)
+JR C,* 38 8  (If Less Than)
+CALL nn CD 12
+CALL NZ,nn C4 12
+CALL Z,nn CC 12
+CALL NC,nn D4 12
+CALL C,nn DC 12
+RST 00H C7 32 (GBS RST table begins at Load address, but can just be code if RSTs aren't used)
+RST 08H CF 32
+RST 10H D7 32
+RST 18H DF 32
+RST 20H E7 32
+RST 28H EF 32
+RST 30H F7 32
+RST 38H FF 32
+RET -/- C9 8
+RET NZ C0 8
+RET Z C8 8
+RET NC D0 8
+RET C D8 8
+RETI -/- D9 8
+DAA -/- 27 4
+CPL -/- 2F 4 (Bitwise Compliment A)
+CCF -/- 3F 4
+SCF -/- 37 4
+NOP -/- 00 4
+HALT -/- 76 4
+STOP -/- 10 00 4
+DI -/- F3 4
+EI -/- FB 4
+RLCA -/- 07 4
+RLA -/- 17 4
+RRCA -/- 0F 4
+RRA -/- 1F 4
+RLC A CB 07 8
+RLC B CB 00 8
+RLC C CB 01 8
+RLC D CB 02 8
+RLC E CB 03 8
+RLC H CB 04 8
+RLC L CB 05 8
+RLC (HL) CB 06 16
+RL A CB 17 8
+RL B CB 10 8
+RL C CB 11 8
+RL D CB 12 8
+RL E CB 13 8
+RL H CB 14 8
+RL L CB 15 8
+RL (HL) CB 16 16
+RRC A CB 0F 8
+RRC B CB 08 8
+RRC C CB 09 8
+RRC D CB 0A 8
+RRC E CB 0B 8
+RRC H CB 0C 8
+RRC L CB 0D 8
+RRC (HL) CB 0E 16
+RR A CB 1F 8
+RR B CB 18 8
+RR C CB 19 8
+RR D CB 1A 8
+RR E CB 1B 8
+RR H CB 1C 8
+RR L CB 1D 8
+RR (HL) CB 1E 16
+SLA A CB 27 8
+SLA B CB 20 8
+SLA C CB 21 8
+SLA D CB 22 8
+SLA E CB 23 8
+SLA H CB 24 8
+SLA L CB 25 8
+SLA (HL) CB 26 16
+SRA A CB 2F 8
+SRA B CB 28 8
+SRA C CB 29 8
+SRA D CB 2A 8
+SRA E CB 2B 8
+SRA H CB 2C 8
+SRA L CB 2D 8
+SRA (HL) CB 2E 16
+SRL A CB 3F 8
+SRL B CB 38 8
+SRL C CB 39 8
+SRL D CB 3A 8
+SRL E CB 3B 8
+SRL H CB 3C 8
+SRL L CB 3D 8
+SRL (HL) CB 3E 16
+BIT b,A CB 47 8
+BIT b,B CB 40 8
+BIT b,C CB 41 8
+BIT b,D CB 42 8
+BIT b,E CB 43 8
+BIT b,H CB 44 8
+BIT b,L CB 45 8
+BIT b,(HL) CB 46 16
+SET b,A CB C7 8
+SET b,B CB C0 8
+SET b,C CB C1 8
+SET b,D CB C2 8
+SET b,E CB C3 8
+SET b,H CB C4 8
+SET b,L CB C5 8
+SET b,(HL) CB C6 16
+RES b,A CB 87 8
+RES b,B CB 80 8
+RES b,C CB 81 8
+RES b,D CB 82 8
+RES b,E CB 83 8
+RES b,H CB 84 8
+RES b,L CB 85 8
+RES b,(HL) CB 86 16
+
+-----
+GBS Specific:
+FF12/FF17/FF1C/FF21 seem to control when channels are stopped
+
+FF1C is the issue in Ultima - RoV2. If you want an easy example, check track 2.
+---
+Some songs may only play correctly with the init/play routines inbetween a DI/EI set
+-----
+
+Consistent coding procedures for some tasks. Not specific, because I'll fill in extra details if needed when I need it.
+
+21YYXX
+85
+6F
+..
+..
+7E
+(Init Code)
+
+(Untested)FF30 Loader code:
+21YYXX (0x10 bytes, at least)
+0600
+1130FF
+2A
+12
+13
+04
+78
+FE10
+20F7
+
+The above example assumes that there is only a song selection number needed to
+init; however, you might find init routines that need to have selection numbers
+written to different memory locations, and those locations should be looked up
+in a similar table.
+
+87 (Double A)
+21XXYY
+85
+6F
+(2A6E67) = (ldi a,(hl)...ld l,(hl), ld h,a) (First byte loads to H, second byte loads to L)
+
+Song/Bank Loader (Song 1, Bank 1, Song 2, Bank 2)
+87 (Double A)
+3C
+21XXYY
+85
+6F
+3A
+EA0020
+3A
+(Music Call)
+
+Load 4 sequential bytes for song channel initing:
+87 (Double A)
+87 (Quadruple A)
+21XXYY
+85
+6F
+3E04 (Count down from 4 to 0 channels)
+F5
+E5
+7E
+A7
+28 03 (Skip Song Init if channel = 0)
+CDXXYY (Song Init)
+E1
+F1
+23 Inc HL
+3D Dec A
+20 F1 JR NZ
+
+Simple A/L lookup table, for JP HL song code.
+(put this after any push/pop operations, so HL isn't lost)
+87 (Double A)
+21YYXX
+85
+6F
+2A
+6E
+26?? (First byte of jump address. If not the same for all 4, more custom coding is needed)
+E9 (Jump to HL)
+
+Data:
+YYXX = E03F
+?? = 06
+
+3FE0 =
+11 22
+
+Assuming the above, song 1 will have an A register value of 11, and will jump to 0622 to execute the Song Init.
+
+
+(478080) = (ld b,a, add a,b, add a,b)
+
+Multiplies A times 3, for a 3-byte based HL lookup table. Useful for saving a bit of space, without using much up. Could be written to multiply by more, but any power of 2 amount is easier, like 2 or 4.
+
+-FF44 90 through 90 Simulation
+HL = 0546 for 90 to 90
+214605
+F044
+0B
+2B
+AF
+B4
+B5
+20F7
+
+
+Skip a single track:
+FE?? (Compare track number to skip, ??)
+3801 (If less than that number, avoid the skip coding)
+3C (Increment AF by 1)
+
+
+(Incomplete) - Skip a list of tracks: (This is rather a lot of space used so far.)
+F5
+0100?? (Number of entries)
+21YYXX
+85
+6F
+F1
+BE
+(Looping here)
+3801
+3C
+23
+0B
+38? ??
+(Init Code)
+
+
+Code for adding SFX calls when music and SFX use different inits
+FE?? (Where ?? is, use the song number after the last actual song)
+DAYYXX (Jump for Music)
+D6?? (Use the same number as above, or use 1 below it if 00 is blank for SFX)
+C3YYXX (Jump for SFX)
+You could use this code with a song table, if there are still blank tracks.
+
+Code for multi-banked music. Must use above sorting code with this. Compare val is Max + 1
+0E 00 ld c,00
+FE 10 cp a,10 (Maximum of 0F tracks per bank. Subtracts 10 for each bank)
+38 05 Continue if there's less than 10 in register a
+D6 10 Subtract 10
+0C increment bank counter
+18 F7 loop back to 'cp a,10'
+47 ld b,a
+3E 01 load initial music bank
+81 add banks counted up to initial bank number
+EA 00 20 set the bank
+78 ld a,b
+CD ?? ?? (Consistent Song Init Jump, like a table header, or an exact address across all banks)
+C9 done
+
+Put SFX After Music code:
+FE ?? (Number of Music Tracks Plus 1) (Last Music - First Music + 1)
+30 04 (If less than the number of music tracks, keep it in range of the music)
+C6 ?? (First number used for Music)
+(Music specific code can be put here)
+18 02 (Skip the decrementing code)
+D6 ?? (Number of Music Tracks Plus 1. Reduce it by 1 to get rid of silent first tracks)
+(SFX Specific code can be put here)
+
+Halve Playback Speed if Double-Speed bit is set:
+(In Play)
+F04D ld a, ff4d (Speed Switch)
+FEFF cp ff
+2812 jr z, play (If it's ff, then this is an original GB, so skip to play)
+F04D ld a, ff4d (Speed Switch)
+E680 and a,80
+280C jr z, play (If it's not set, skip to play)
+FA???? ld a,????
+EE01 xor a,01
+EA???? ld ????,a
+E601 and a,01
+28?? jr z, end
+('play' code here)
+C9 ret (end)
+
+0x001 - 0x1FF sound bank coding addition:
+(Only allows for 0x200 size total for this small code addition)
+(To maximize space, have table start at a ??00 boundry in the GBS, so it can pass the 00 boundry with less issue. Passing 2 0x?X00 boundry markers will cause an error where it only increments the 0x?X00 address part in HL 1 time)
+21YYXX
+85
+++++++++
+30 01
+24
+++++++++
+6F
+...(Rest of routine)
+
+Sound Init Routine:
+
+Load the register with the temporary channel-active values.
+F0 26
+E6 0F
+C0 = RET NZ
+
+FA YY XX = Load (UnusedAddress1)
+C0 = RET NZ
+
+3E 80 = LD A, 80
+EA YY XX = Store (UnusedAddress1)
+E0 26 = $FF26(NR52) = 0x80
+E0 10 = $FF10(NR10) - 0x80
+
+3E 77
+E0 24 $FF24(NR50) - 0x77
+
+3E BF
+E0 11 $FF11(NR11) - 0xBF
+E0 14 $FF14(NR14) - 0xBF
+E0 19 $FF19(NR24) - 0xBF
+E0 1E $FF1E(NR34) - 0xBF
+E0 23 $FF23(NR44) - 0xBF
+
+3E F3
+E0 12 $FF12(NR12) - 0xF3
+E0 25 $FF25(NR51) - 0xF3
+
+AF
+E0 17 $FF17(NR22) - 0x00
+E0 21 $FF21(NR42) - 0x00
+E0 22 $FF22(NR43) - 0x00
+
+3E 3F
+E0 16 $FF16(NR21) - 0x3F
+
+3E 7F
+E0 1A $FF1A(NR30) - 0x7F
+
+3E 9F
+E0 1C $FF1C(NR32) - 0x9F
+
+3E FF
+E0 1B $FF1B(NR31) - 0xFF
+E0 20 $FF20(NR41) - 0xFF
+C9
+
+If GBC, No Change = 0xFF (Just include it after the above FF writing routine)
+E0 13 $FF13(NR13) - No Change
+E0 20 $FF15(NR20) - No Change
+E0 23 $FF18(NR23) - No Change
+E0 33 $FF1D(NR33) - No Change
+E0 40 $FF1F(NR40) - No Change
+C9

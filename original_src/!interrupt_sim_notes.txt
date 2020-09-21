@@ -1,0 +1,58 @@
+Ignore this, unless you're just ambitious. It's not really needed with support added to NEZPlug++ and GBS2GB.
+
+---
+The interrupt simulator does not run in NEZPlug, so it may also not run on real hardware.
+Since the routine is for backwards compatibility, it's simply not ready. I think it has something to do with not being able to write to the FF** area from code as needed, which includes FF0F.
+
+The routine seems to function both in BGB and VBA
+---
+
+The basic setup for how to keep a GBS compatible with this new format, without
+sacrificing playability on standard players, is to use an interrupt simulator
+in code, and checks to see if the RST code was used, so you can skip it.
+
+When it functions, it does a somewhat decent job of simulating interrupts.
+
+Interrupt Simulator:
+I'm not sure how to make this work correctly. I believe the concept has merit, but without some way to test it for sure, I'm not prepared to say it's valid.
+
+After running the Interrupt Simulator code, call the same address, plus 3 bytes to avoid the first call.
+
+Note that the music won't sound right, but it will play in players that don't support 0x40/0x50 rewriting. Since, at this time, this is every single player besides the GBS2GB one I'm releasing with this document, it would be wise to include coding of this type in any GBS setup that uses the interrupt coding.
+
+(I haven't really gotten enough information to say how to redesign this if it doesn't work for you. My only thought on it is that if music doesn't play right, try replacing the first call with the vblank coding instead of the timer coding)
+{
+CD???? (Timer Code)
+
+Interrupt Recheck after Run:
+F00F (Load interrupt flags)
+E605 (AND everything but bits 01 and 04)
+FE01 (If it's 01, go to vblank call)
+2809
+FE04 (If it's 04, go to timer call)
+2812
+FE05 (If it's 05, go to both call)
+280B
+C9
+F00F
+E6FE (Removes bit 01)
+E00F
+CD???? (VBlank Code)
+C9
+CD???? (VBlank Code) (This should never get hit, but just in case...)
+F00F
+E6FA (Removes bits 01 and 05. )
+E00F
+CD???? (Timer Code)
+C9
+}
+
+
+This should be used in play, if the above code gets to a working state.
+Int not run
+CD???? (Interrupt Simulator)
+CD????+3 (Interrupt Simulator->Interrupt Recheck after Run)
+F00F
+E605 (If either interrupt is set, redo the Recheck)
+20F7
+C9 (Done)
